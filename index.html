@@ -1,130 +1,211 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>最強ガチャゲーム</title>
-<style>
-body{font-family:sans-serif;text-align:center;background:#111;color:#fff}
-button{padding:10px 20px;font-size:18px;border-radius:10px;background:gold;border:none;margin:5px}
-img{width:120px;margin-top:10px}
-.gacha-box{margin:30px auto;padding:20px;width:320px;background:#222;border-radius:10px}
-.rainbow{animation:rainbow 0.5s infinite}
-@keyframes rainbow{
-0%{box-shadow:0 0 10px red}
-25%{box-shadow:0 0 10px yellow}
-50%{box-shadow:0 0 10px green}
-75%{box-shadow:0 0 10px blue}
-100%{box-shadow:0 0 10px purple}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>極限召喚 - Gacha Simulator</title>
+    <style>
+        :root {
+            --rarity-r: #a0a0a0;
+            --rarity-sr: #4ea8de;
+            --rarity-ssr: #ffcc00;
+            --bg-color: #1a1a2e;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-shadow: 0 0 10px #4ea8de;
+            margin-bottom: 20px;
+        }
+
+        /* ガチャリザルトエリア */
+        #display-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            min-height: 300px;
+            width: 90%;
+            max-width: 800px;
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px dashed #444;
+            border-radius: 15px;
+        }
+
+        /* カードのデザイン */
+        .card {
+            width: 120px;
+            height: 180px;
+            background: #222;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: appear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 3px solid transparent;
+        }
+
+        @keyframes appear {
+            from { transform: scale(0) rotate(-10deg); opacity: 0; }
+            to { transform: scale(1) rotate(0); opacity: 1; }
+        }
+
+        .card.r { border-color: var(--rarity-r); }
+        .card.sr { border-color: var(--rarity-sr); box-shadow: 0 0 15px var(--rarity-sr); }
+        .card.ssr { border-color: var(--rarity-ssr); box-shadow: 0 0 25px var(--rarity-ssr); animation: ssr-glow 1s infinite alternate; }
+
+        @keyframes ssr-glow {
+            from { box-shadow: 0 0 10px var(--rarity-ssr); }
+            to { box-shadow: 0 0 30px var(--rarity-ssr); }
+        }
+
+        .rarity-label {
+            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .r .rarity-label { color: var(--rarity-r); }
+        .sr .rarity-label { color: var(--rarity-sr); }
+        .ssr .rarity-label { color: var(--rarity-ssr); }
+
+        /* ボタン */
+        .controls {
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(45deg, #16213e, #0f3460);
+            border: 2px solid #4ea8de;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.2s;
+            outline: none;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(78, 168, 222, 0.4);
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+        }
+
+        button:active { transform: translateY(0); }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 演出用 */
+        #status {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            height: 1.5rem;
+            color: #4ea8de;
+        }
+    </style>
 </head>
 <body>
 
-<h1>🎮 最強ガチャ</h1>
+    <h1>✨ 超神話召喚 ✨</h1>
 
-<div class="gacha-box" id="box">
-<p id="stone"></p>
-<p id="collection"></p>
-<button onclick="drawGacha()">1回ガチャ</button>
-<button onclick="draw10()">10連</button>
-<div id="result"></div>
-</div>
+    <div id="display-area">
+        </div>
 
-<h2>📘 図鑑</h2>
-<div id="dex" style="display:flex;flex-wrap:wrap;justify-content:center"></div>
+    <div id="status"></div>
 
-<script>
-const elements=["🔥","💧","🌿","⚡","🌑","✨"];
+    <div class="controls">
+        <button onclick="playGacha(1)">1回召喚</button>
+        <button onclick="playGacha(10)">10回召喚</button>
+    </div>
 
-function randName(){
- const p=["アル","ゼル","ガル","ミラ","レオ","クロ"];
- return p[Math.floor(Math.random()*p.length)]+Math.floor(Math.random()*1000);
-}
+    <script>
+        const displayArea = document.getElementById('display-area');
+        const statusText = document.getElementById('status');
+        const buttons = document.querySelectorAll('button');
 
-const items=[
-...Array.from({length:40},()=>({name:randName(),rarity:"N",rate:40,img:"https://via.placeholder.com/100",atk:10})),
-...Array.from({length:30},()=>({name:randName(),rarity:"R",rate:30,img:"https://via.placeholder.com/100",atk:50})),
-...Array.from({length:20},()=>({name:randName(),rarity:"SR",rate:20,img:"https://via.placeholder.com/100",atk:100})),
-...Array.from({length:10},()=>({name:randName(),rarity:"UR",rate:10,img:"https://via.placeholder.com/100",atk:200}))
-];
+        // ガチャのデータ設定
+        const MASTER_DATA = [
+            { rarity: 'SSR', prob: 0.05, label: 'SRR' },
+            { rarity: 'SR', prob: 0.15, label: 'SR' },
+            { rarity: 'R', prob: 0.80, label: 'R' }
+        ];
 
-let stones=parseInt(localStorage.getItem("stones"))||50;
-let collection=JSON.parse(localStorage.getItem("collection"))||{};
+        // ガチャ実行メイン関数
+        async function playGacha(count) {
+            // UIのリセットと無効化
+            displayArea.innerHTML = '';
+            toggleButtons(true);
+            
+            // 演出：タメの時間
+            statusText.innerText = '召喚の儀を執り行っています...';
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            statusText.innerText = '';
 
-updateUI();
-updateDex();
+            for (let i = 0; i < count; i++) {
+                const result = draw();
+                createCard(result);
+                // 10連の時は少しずつ表示させる
+                if (count > 1) await new Promise(resolve => setTimeout(resolve, 100));
+            }
 
-function drawGacha(){
- if(stones<=0){alert("石ない");return;}
- stones--;
- save();
- roll();
-}
+            toggleButtons(false);
+            if (count === 10) statusText.innerText = '召喚完了！';
+        }
 
-function draw10(){
- if(stones<10){alert("石足りない");return;}
- stones-=10;
- save();
- for(let i=0;i<10;i++) roll();
-}
+        // 抽選ロジック
+        function draw() {
+            const rand = Math.random();
+            let cumulativeProb = 0;
 
-function roll(){
- const rand=Math.random()*100;
- let sum=0;
- for(let item of items){
-  sum+=item.rate;
-  if(rand<=sum){
-   getItem(item);
-   return;
-  }
- }
-}
+            for (const item of MASTER_DATA) {
+                cumulativeProb += item.prob;
+                if (rand < cumulativeProb) {
+                    return item;
+                }
+            }
+            return MASTER_DATA[MASTER_DATA.length - 1];
+        }
 
-function getItem(item){
- if(collection[item.name]) collection[item.name]++;
- else collection[item.name]=1;
+        // カードのHTML要素を生成
+        function createCard(data) {
+            const card = document.createElement('div');
+            card.className = `card ${data.rarity.toLowerCase()}`;
+            
+            card.innerHTML = `
+                <div class="rarity-label">${data.rarity}</div>
+                <div style="font-size: 0.8rem; opacity: 0.8;">Character</div>
+            `;
+            
+            displayArea.appendChild(card);
+        }
 
- if(item.rarity==="UR"){
-  document.getElementById("box").classList.add("rainbow");
-  setTimeout(()=>document.getElementById("box").classList.remove("rainbow"),1000);
- }
-
- document.getElementById("result").innerHTML=
- `<p>${item.rarity}</p>
-  <p>${item.name}</p>
-  <p>${elements[Math.floor(Math.random()*elements.length)]}</p>
-  <p>⚔️${item.atk}</p>
-  <img src="${item.img}">`;
-
- save();
- updateUI();
- updateDex();
-}
-
-function updateUI(){
- document.getElementById("stone").innerText="💎 "+stones;
- const percent=Math.floor(Object.keys(collection).length/items.length*100);
- document.getElementById("collection").innerText="📘 "+percent+"%";
-}
-
-function updateDex(){
- const dex=document.getElementById("dex");
- dex.innerHTML="";
- items.forEach(i=>{
-  const d=document.createElement("div");
-  d.style.width="80px";
-  d.style.margin="4px";
-  d.style.background=collection[i.name]?"#333":"#111";
-  d.innerHTML=collection[i.name]?`<img src="${i.img}"><br>${i.name}`:"???";
-  dex.appendChild(d);
- });
-}
-
-function save(){
- localStorage.setItem("stones",stones);
- localStorage.setItem("collection",JSON.stringify(collection));
-}
-</script>
-
+        // ボタンの活性・非活性切り替え
+        function toggleButtons(disabled) {
+            buttons.forEach(btn => btn.disabled = disabled);
+        }
+    </script>
 </body>
 </html>
