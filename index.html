@@ -105,46 +105,42 @@
   }
 
   const items = [
-    // N (多め)
-    ...Array.from({length:N_COUNT}, (_,i)=>({ 
-      name: randomName("N"), 
-      rarity:"N", 
-      rate:2, 
-      element: elements[Math.floor(Math.random()*elements.length)],
-      atk: Math.floor(Math.random()*50)+10,
-      img:`https://via.placeholder.com/150/777777?text=N${i+1}` 
-    }))=>({ name:`モンスター${i+1}`, rarity:"N", rate:2, img:`https://via.placeholder.com/150/777777?text=N${i+1}` })),
+  ...Array.from({length:N_COUNT}, (_,i)=>({ 
+    name: randomName("N"), 
+    rarity:"N", 
+    rate:2, 
+    element: elements[Math.floor(Math.random()*elements.length)],
+    atk: Math.floor(Math.random()*50)+10,
+    img:`https://via.placeholder.com/150/777777?text=N${i+1}`
+  })),
 
-    // R
-    ...Array.from({length:R_COUNT}, (_,i)=>({ 
-      name: randomName("R"), 
-      rarity:"R", 
-      rate:1.5, 
-      element: elements[Math.floor(Math.random()*elements.length)],
-      atk: Math.floor(Math.random()*80)+50,
-      img:`https://via.placeholder.com/150/1E90FF?text=R${i+1}` 
-    }))=>({ name:`戦士${i+1}`, rarity:"R", rate:1.5, img:`https://via.placeholder.com/150/1E90FF?text=R${i+1}` })),
+  ...Array.from({length:R_COUNT}, (_,i)=>({ 
+    name: randomName("R"), 
+    rarity:"R", 
+    rate:1.5, 
+    element: elements[Math.floor(Math.random()*elements.length)],
+    atk: Math.floor(Math.random()*80)+50,
+    img:`https://via.placeholder.com/150/1E90FF?text=R${i+1}`
+  })),
 
-    // SR
-    ...Array.from({length:SR_COUNT}, (_,i)=>({ 
-      name: randomName("SR"), 
-      rarity:"SR", 
-      rate:1.0, 
-      element: elements[Math.floor(Math.random()*elements.length)],
-      atk: Math.floor(Math.random()*120)+100,
-      img:`https://via.placeholder.com/150/FFD700?text=SR${i+1}` 
-    }))=>({ name:`伝説${i+1}`, rarity:"SR", rate:1.0, img:`https://via.placeholder.com/150/FFD700?text=SR${i+1}` })),
+  ...Array.from({length:SR_COUNT}, (_,i)=>({ 
+    name: randomName("SR"), 
+    rarity:"SR", 
+    rate:1.0, 
+    element: elements[Math.floor(Math.random()*elements.length)],
+    atk: Math.floor(Math.random()*120)+100,
+    img:`https://via.placeholder.com/150/FFD700?text=SR${i+1}`
+  })),
 
-    // UR
-    ...Array.from({length:UR_COUNT}, (_,i)=>({ 
-      name: randomName("UR"), 
-      rarity:"UR", 
-      rate:0.5, 
-      element: elements[Math.floor(Math.random()*elements.length)],
-      atk: Math.floor(Math.random()*200)+200,
-      img:`https://via.placeholder.com/150/FF0000?text=UR${i+1}` 
-    }))=>({ name:`神話${i+1}`, rarity:"UR", rate:0.5, img:`https://via.placeholder.com/150/FF0000?text=UR${i+1}` }))
-  ];
+  ...Array.from({length:UR_COUNT}, (_,i)=>({ 
+    name: randomName("UR"), 
+    rarity:"UR", 
+    rate:0.5, 
+    element: elements[Math.floor(Math.random()*elements.length)],
+    atk: Math.floor(Math.random()*200)+200,
+    img:`https://via.placeholder.com/150/FF0000?text=UR${i+1}`
+  }))
+];
 
   function drawGacha() {
     if (stones <= 0) {
@@ -334,4 +330,3 @@
 
 </body>
 </html>
-
