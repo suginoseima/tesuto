@@ -2,56 +2,127 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>完成版ガチャゲーム</title>
+<title>最強ガチャゲーム</title>
 <style>
 body{font-family:sans-serif;text-align:center;background:#111;color:#fff}
-button{padding:10px 20px;font-size:18px;border-radius:10px;background:gold;border:none}
+button{padding:10px 20px;font-size:18px;border-radius:10px;background:gold;border:none;margin:5px}
 img{width:120px;margin-top:10px}
-.gacha-box{margin:30px auto;padding:20px;width:300px;background:#222;border-radius:10px}
+.gacha-box{margin:30px auto;padding:20px;width:320px;background:#222;border-radius:10px}
+.rainbow{animation:rainbow 0.5s infinite}
+@keyframes rainbow{
+0%{box-shadow:0 0 10px red}
+25%{box-shadow:0 0 10px yellow}
+50%{box-shadow:0 0 10px green}
+75%{box-shadow:0 0 10px blue}
+100%{box-shadow:0 0 10px purple}
+}
 </style>
 </head>
 <body>
 
-<h1>🎮 ガチャゲーム</h1>
+<h1>🎮 最強ガチャ</h1>
 
-<div class="gacha-box">
-<p id="stone">💎 50</p>
-<button onclick="drawGacha()">ガチャる！</button>
+<div class="gacha-box" id="box">
+<p id="stone"></p>
+<p id="collection"></p>
+<button onclick="drawGacha()">1回ガチャ</button>
+<button onclick="draw10()">10連</button>
 <div id="result"></div>
 </div>
 
+<h2>📘 図鑑</h2>
+<div id="dex" style="display:flex;flex-wrap:wrap;justify-content:center"></div>
+
 <script>
-const items = [
- {name:"スライム",rarity:"N",rate:50,img:"https://via.placeholder.com/150?text=Slime"},
- {name:"ナイト",rarity:"R",rate:30,img:"https://via.placeholder.com/150?text=Knight"},
- {name:"ドラゴン",rarity:"SR",rate:15,img:"https://via.placeholder.com/150?text=Dragon"},
- {name:"神",rarity:"UR",rate:5,img:"https://via.placeholder.com/150?text=GOD"}
+const elements=["🔥","💧","🌿","⚡","🌑","✨"];
+
+function randName(){
+ const p=["アル","ゼル","ガル","ミラ","レオ","クロ"];
+ return p[Math.floor(Math.random()*p.length)]+Math.floor(Math.random()*1000);
+}
+
+const items=[
+...Array.from({length:40},()=>({name:randName(),rarity:"N",rate:40,img:"https://via.placeholder.com/100",atk:10})),
+...Array.from({length:30},()=>({name:randName(),rarity:"R",rate:30,img:"https://via.placeholder.com/100",atk:50})),
+...Array.from({length:20},()=>({name:randName(),rarity:"SR",rate:20,img:"https://via.placeholder.com/100",atk:100})),
+...Array.from({length:10},()=>({name:randName(),rarity:"UR",rate:10,img:"https://via.placeholder.com/100",atk:200}))
 ];
 
-let stones = 50;
+let stones=parseInt(localStorage.getItem("stones"))||50;
+let collection=JSON.parse(localStorage.getItem("collection"))||{};
+
+updateUI();
+updateDex();
 
 function drawGacha(){
  if(stones<=0){alert("石ない");return;}
  stones--;
- document.getElementById("stone").innerText="💎 "+stones;
+ save();
+ roll();
+}
 
- let rand=Math.random()*100;
+function draw10(){
+ if(stones<10){alert("石足りない");return;}
+ stones-=10;
+ save();
+ for(let i=0;i<10;i++) roll();
+}
+
+function roll(){
+ const rand=Math.random()*100;
  let sum=0;
-
  for(let item of items){
   sum+=item.rate;
   if(rand<=sum){
-    showResult(item);
-    return;
+   getItem(item);
+   return;
   }
  }
 }
 
-function showResult(item){
+function getItem(item){
+ if(collection[item.name]) collection[item.name]++;
+ else collection[item.name]=1;
+
+ if(item.rarity==="UR"){
+  document.getElementById("box").classList.add("rainbow");
+  setTimeout(()=>document.getElementById("box").classList.remove("rainbow"),1000);
+ }
+
  document.getElementById("result").innerHTML=
  `<p>${item.rarity}</p>
   <p>${item.name}</p>
+  <p>${elements[Math.floor(Math.random()*elements.length)]}</p>
+  <p>⚔️${item.atk}</p>
   <img src="${item.img}">`;
+
+ save();
+ updateUI();
+ updateDex();
+}
+
+function updateUI(){
+ document.getElementById("stone").innerText="💎 "+stones;
+ const percent=Math.floor(Object.keys(collection).length/items.length*100);
+ document.getElementById("collection").innerText="📘 "+percent+"%";
+}
+
+function updateDex(){
+ const dex=document.getElementById("dex");
+ dex.innerHTML="";
+ items.forEach(i=>{
+  const d=document.createElement("div");
+  d.style.width="80px";
+  d.style.margin="4px";
+  d.style.background=collection[i.name]?"#333":"#111";
+  d.innerHTML=collection[i.name]?`<img src="${i.img}"><br>${i.name}`:"???";
+  dex.appendChild(d);
+ });
+}
+
+function save(){
+ localStorage.setItem("stones",stones);
+ localStorage.setItem("collection",JSON.stringify(collection));
 }
 </script>
 
