@@ -1,331 +1,58 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ガチャゲーム（演出付き）</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: radial-gradient(circle, #1e3c72, #000);
-      color: white;
-      overflow-x: hidden;
-    }
-
-    h1 { margin-top: 20px; }
-
-    .gacha-box {
-      margin: 40px auto;
-      padding: 20px;
-      width: 320px;
-      border-radius: 15px;
-      background: rgba(255,255,255,0.1);
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-
-    button {
-      padding: 12px 24px;
-      font-size: 18px;
-      border: none;
-      border-radius: 10px;
-      background: gold;
-      cursor: pointer;
-    }
-
-    button:hover { background: orange; }
-
-    .result {
-      margin-top: 20px;
-      font-size: 20px;
-    }
-
-    img {
-      width: 150px;
-      margin-top: 10px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #fff;
-    }
-
-    .effect {
-      animation: flash 0.5s alternate 6;
-    }
-
-    @keyframes flash {
-      from { background-color: rgba(255,255,255,0.1); }
-      to { background-color: rgba(255,255,255,0.5); }
-    }
-
-    @keyframes rainbow {
-      0% { box-shadow: 0 0 20px red; }
-      20% { box-shadow: 0 0 20px orange; }
-      40% { box-shadow: 0 0 20px yellow; }
-      60% { box-shadow: 0 0 20px green; }
-      80% { box-shadow: 0 0 20px blue; }
-      100% { box-shadow: 0 0 20px violet; }
-    }
-
-    .rainbow-effect {
-      animation: rainbow 0.5s linear infinite;
-    }
-      to { background-color: rgba(255,255,255,0.5); }
-    }
-
-    .rare { color: #00ffff; }
-    .super-rare { color: gold; }
-    .ultra-rare { color: #ff4d4d; font-weight: bold; }
-
-  </style>
+<meta charset="UTF-8">
+<title>完成版ガチャゲーム</title>
+<style>
+body{font-family:sans-serif;text-align:center;background:#111;color:#fff}
+button{padding:10px 20px;font-size:18px;border-radius:10px;background:gold;border:none}
+img{width:120px;margin-top:10px}
+.gacha-box{margin:30px auto;padding:20px;width:300px;background:#222;border-radius:10px}
+</style>
 </head>
 <body>
 
 <h1>🎮 ガチャゲーム</h1>
 
-<div class="gacha-box" id="box">
-  <p id="stone">💎 ガチャ石: 50</p>
-  <p id="collection">📘 図鑑: 0%</p>
-  <p>ボタンを押してガチャを回そう！</p>
-  <button onclick="drawGacha()">ガチャる！</button>
-  <div class="result" id="result"></div>
+<div class="gacha-box">
+<p id="stone">💎 50</p>
+<button onclick="drawGacha()">ガチャる！</button>
+<div id="result"></div>
 </div>
 
 <script>
-  // キャラ数を簡単に増やせる設定
-  const N_COUNT = 50;
-  const R_COUNT = 40;
-  const SR_COUNT = 30;
-  const UR_COUNT = 20;
-
-  // 属性リスト
-  const elements = ["🔥火", "💧水", "🌿風", "⚡雷", "🌑闇", "✨光"];
-
-  // ランダム名前生成
-  function randomName(prefix) {
-    const parts = ["アル", "ゼル", "ガル", "ディア", "レオ", "ミラ", "クロ", "フェル"];
-    return prefix + parts[Math.floor(Math.random()*parts.length)] + Math.floor(Math.random()*100);
-  }
-
-  const items = [
-  ...Array.from({length:N_COUNT}, (_,i)=>({ 
-    name: randomName("N"), 
-    rarity:"N", 
-    rate:2, 
-    element: elements[Math.floor(Math.random()*elements.length)],
-    atk: Math.floor(Math.random()*50)+10,
-    img:`https://via.placeholder.com/150/777777?text=N${i+1}`
-  })),
-
-  ...Array.from({length:R_COUNT}, (_,i)=>({ 
-    name: randomName("R"), 
-    rarity:"R", 
-    rate:1.5, 
-    element: elements[Math.floor(Math.random()*elements.length)],
-    atk: Math.floor(Math.random()*80)+50,
-    img:`https://via.placeholder.com/150/1E90FF?text=R${i+1}`
-  })),
-
-  ...Array.from({length:SR_COUNT}, (_,i)=>({ 
-    name: randomName("SR"), 
-    rarity:"SR", 
-    rate:1.0, 
-    element: elements[Math.floor(Math.random()*elements.length)],
-    atk: Math.floor(Math.random()*120)+100,
-    img:`https://via.placeholder.com/150/FFD700?text=SR${i+1}`
-  })),
-
-  ...Array.from({length:UR_COUNT}, (_,i)=>({ 
-    name: randomName("UR"), 
-    rarity:"UR", 
-    rate:0.5, 
-    element: elements[Math.floor(Math.random()*elements.length)],
-    atk: Math.floor(Math.random()*200)+200,
-    img:`https://via.placeholder.com/150/FF0000?text=UR${i+1}`
-  }))
+const items = [
+ {name:"スライム",rarity:"N",rate:50,img:"https://via.placeholder.com/150?text=Slime"},
+ {name:"ナイト",rarity:"R",rate:30,img:"https://via.placeholder.com/150?text=Knight"},
+ {name:"ドラゴン",rarity:"SR",rate:15,img:"https://via.placeholder.com/150?text=Dragon"},
+ {name:"神",rarity:"UR",rate:5,img:"https://via.placeholder.com/150?text=GOD"}
 ];
 
-  function drawGacha() {
-    if (stones <= 0) {
-      alert("ガチャ石が足りない！");
-      return;
-    }
+let stones = 50;
 
-    stones--;
-    localStorage.setItem("stones", stones);
-    document.getElementById("stone").innerText = `💎 ガチャ石: ${stones}`;
-    const box = document.getElementById("box");
-    const resultDiv = document.getElementById("result");
+function drawGacha(){
+ if(stones<=0){alert("石ない");return;}
+ stones--;
+ document.getElementById("stone").innerText="💎 "+stones;
 
-    // 演出開始
-    box.classList.add("effect");
-    resultDiv.innerHTML = "ガチャ中...";
+ let rand=Math.random()*100;
+ let sum=0;
 
-    setTimeout(() => {
-      box.classList.remove("effect");
-
-      const rand = Math.random() * 100;
-      let sum = 0;
-
-      for (let item of items) {
-        sum += item.rate;
-        if (rand <= sum) {
-          showResult(item);
-          return;
-        }
-      }
-    }, 1500);
+ for(let item of items){
+  sum+=item.rate;
+  if(rand<=sum){
+    showResult(item);
+    return;
   }
+ }
+}
 
-  function showResult(item) {
-    const box = document.getElementById("box");
-
-    // 効果音
-    if (item.rarity === "SR" || item.rarity === "UR") {
-      const audio = new Audio("https://www.soundjay.com/buttons/sounds/button-09.mp3");
-      audio.play();
-    }
-    const box = document.getElementById("box");
-    const resultDiv = document.getElementById("result");
-
-    let className = "";
-    if (item.rarity === "R") className = "rare";
-    if (item.rarity === "SR") className = "super-rare";
-    if (item.rarity === "UR") className = "ultra-rare";
-
-    // レア度で演出強化
-    let effectText = "";
-    if (item.rarity === "SR") effectText = "🌟 レア確定！";
-    if (item.rarity === "UR") effectText = "🔥 超激レア！！🔥";
-
-    // URなら虹エフェクト
-    if (item.rarity === "UR") {
-      box.classList.add("rainbow-effect");
-      setTimeout(() => box.classList.remove("rainbow-effect"), 2000);
-    }
-
-    resultDiv.innerHTML = `
-      <p>${effectText}</p>
-      <p>✨ ${item.rarity} 獲得！</p>
-      <p class="${className}">${item.name}</p>
-      <p>${item.element}</p>
-      <p>⚔️ 攻撃力: ${item.atk}</p>
-      <img src="${item.img}">
-    `;
-  }
-  // 所持キャラ管理
-  const collection = {};
-  // セーブデータ読み込み
-  let stones = parseInt(localStorage.getItem("stones")) || 50;
-  const savedCollection = JSON.parse(localStorage.getItem("collection")) || {};
-  Object.assign(collection, savedCollection);
-
-  // ログインボーナス
-  const lastLogin = localStorage.getItem("lastLogin");
-  const today = new Date().toDateString();
-  if (lastLogin !== today) {
-    stones += 10;
-    localStorage.setItem("lastLogin", today);
-    alert("🎁 ログインボーナス！ガチャ石+10");
-  }
-
-  const totalCharacters = items.length;
-
-  document.getElementById("stone").innerText = `💎 ガチャ石: ${stones}`;
-
-  // 図鑑初期表示
-  const ownedInit = Object.keys(collection).length;
-  const percentInit = Math.floor((ownedInit / totalCharacters) * 100);
-  document.getElementById("collection").innerText = `📘 図鑑: ${percentInit}%`;
-  const totalCharacters = items.length;
-
-  function showResult(item) {
-    const resultDiv = document.getElementById("result");
-
-    let className = "";
-    if (item.rarity === "R") className = "rare";
-    if (item.rarity === "SR") className = "super-rare";
-    if (item.rarity === "UR") className = "ultra-rare";
-
-    // 被りチェック
-    let duplicateText = "";
-    if (collection[item.name]) {
-      collection[item.name]++;
-      duplicateText = `⚡ 被り！ レベルUP → Lv.${collection[item.name]}`;
-    } else {
-      collection[item.name] = 1;
-      localStorage.setItem("collection", JSON.stringify(collection));
-
-      // 図鑑更新
-      const owned = Object.keys(collection).length;
-      const percent = Math.floor((owned / totalCharacters) * 100);
-      document.getElementById("collection").innerText = `📘 図鑑: ${percent}%`;
-    }
-
-    // レア演出
-    let effectText = "";
-    if (item.rarity === "SR") effectText = "🌟 レア確定！";
-    if (item.rarity === "UR") effectText = "🔥 超激レア！！🔥";
-
-    resultDiv.innerHTML = `
-      <p>${effectText}</p>
-      <p>✨ ${item.rarity} 獲得！</p>
-      <p class="${className}">${item.name}</p>
-      <img src="${item.img}">
-      <p>${duplicateText}</p>
-    `;
-  }
-</script>
-
-<div id="dex" style="margin-top:30px;">
-  <h2>📘 図鑑一覧</h2>
-  <button onclick="sortMode='rarity'; updateDex()">レア度順</button>
-  <button onclick="sortMode='default'; updateDex()">デフォルト</button>
-  <div id="dexList" style="display:flex;flex-wrap:wrap;justify-content:center;"></div>
-</div>
-
-<script>
-  let sortMode = "rarity";
-
-  function updateDex() {
-    const dexList = document.getElementById("dexList");
-    dexList.innerHTML = "";
-
-    // 並び替え
-    let sortedItems = [...items];
-    if (sortMode === "rarity") {
-      const rarityOrder = { "UR": 4, "SR": 3, "R": 2, "N": 1 };
-      sortedItems.sort((a, b) => rarityOrder[b.rarity] - rarityOrder[a.rarity]);
-    }
-
-
-    const dexList = document.getElementById("dexList");
-    dexList.innerHTML = "";
-
-    sortedItems.forEach(item => {
-      const owned = collection[item.name];
-
-      const card = document.createElement("div");
-      card.style.width = "100px";
-      card.style.margin = "5px";
-      card.style.padding = "5px";
-      card.style.borderRadius = "10px";
-      card.style.background = owned ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.5)";
-
-      card.innerHTML = owned
-        ? `<img src="${item.img}" style="width:80px"><p>${item.name}</p><p>Lv.${collection[item.name]}</p>`
-        : `<div style="width:80px;height:80px;background:#333;margin:auto"></div><p>???</p>`;
-
-      dexList.appendChild(card);
-    });
-  }
-
-  // 既存の更新処理に追加
-  const originalShowResult = showResult;
-  showResult = function(item) {
-    originalShowResult(item);
-    updateDex();
-  };
-
-  // 初期表示
-  updateDex();
+function showResult(item){
+ document.getElementById("result").innerHTML=
+ `<p>${item.rarity}</p>
+  <p>${item.name}</p>
+  <img src="${item.img}">`;
+}
 </script>
 
 </body>
